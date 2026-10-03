@@ -1,0 +1,6 @@
+{
+  "name": "AI Shorts Maker",
+  "description": "AI-powered long-video-to-short-video platform that intelligently finds viral highlights, converts to 9:16 vertical shorts, and generates synchronized captions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

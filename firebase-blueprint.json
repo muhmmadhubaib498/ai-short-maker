@@ -1,0 +1,221 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile data stored in Firestore",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique Firebase Auth UID of the user",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the user",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the user",
+          "maxLength": 150
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the user in the system (OWNER, ADMIN, or USER)",
+          "enum": ["OWNER", "ADMIN", "USER"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the user account",
+          "enum": ["ACTIVE", "SUSPENDED"]
+        },
+        "demo_used": {
+          "type": "boolean",
+          "description": "Whether the user has consumed their free video demo"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the account was registered"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last profile update"
+        }
+      },
+      "required": ["id", "name", "email", "role", "status", "demo_used"]
+    },
+    "UserProject": {
+      "title": "UserProject",
+      "description": "Video project uploaded and processed by a user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the project",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the owner who created this project",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the project",
+          "maxLength": 120
+        },
+        "originalFilename": {
+          "type": "string",
+          "description": "Original filename of the uploaded video",
+          "maxLength": 200
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration in seconds"
+        },
+        "status": {
+          "type": "string",
+          "description": "Processing status of the project",
+          "enum": ["QUEUED", "PROCESSING", "COMPLETED", "FAILED"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["id", "userId", "name", "status"]
+    },
+    "UserClip": {
+      "title": "UserClip",
+      "description": "Generated short clip metadata",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique clip identifier",
+          "maxLength": 128
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Parent project ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID",
+          "maxLength": 128
+        },
+        "clipNumber": {
+          "type": "number",
+          "description": "Index number of the clip"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the clip",
+          "maxLength": 120
+        },
+        "duration": {
+          "type": "number",
+          "description": "Clip duration in seconds"
+        },
+        "aspectRatio": {
+          "type": "string",
+          "description": "Aspect ratio of the clip",
+          "enum": ["9:16", "16:9", "1:1"]
+        },
+        "captionStatus": {
+          "type": "boolean",
+          "description": "Whether captions are enabled"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["id", "projectId", "userId", "clipNumber", "title", "aspectRatio"]
+    },
+    "PaymentRecord": {
+      "title": "PaymentRecord",
+      "description": "Manual payment submitted for review",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique payment record ID",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the user making payment",
+          "maxLength": 128
+        },
+        "userEmail": {
+          "type": "string",
+          "description": "Email of user",
+          "maxLength": 150
+        },
+        "plan": {
+          "type": "string",
+          "description": "Plan requested",
+          "enum": ["MONTHLY", "YEARLY"]
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount in USD"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Payment method used",
+          "maxLength": 50
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "User submitted transaction reference",
+          "maxLength": 100
+        },
+        "status": {
+          "type": "string",
+          "description": "Review status",
+          "enum": ["PENDING", "APPROVED", "REJECTED"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Submission timestamp"
+        }
+      },
+      "required": ["id", "userId", "plan", "amount", "paymentMethod", "transactionId", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "User profiles indexed by Firebase Auth UID"
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": {
+        "$ref": "#/entities/UserProject"
+      },
+      "description": "Video projects belonging to a user"
+    },
+    "/users/{userId}/projects/{projectId}/clips/{clipId}": {
+      "schema": {
+        "$ref": "#/entities/UserClip"
+      },
+      "description": "Clips generated for a user's video project"
+    },
+    "/payments/{paymentId}": {
+      "schema": {
+        "$ref": "#/entities/PaymentRecord"
+      },
+      "description": "Manual payment requests submitted for review"
+    }
+  }
+}

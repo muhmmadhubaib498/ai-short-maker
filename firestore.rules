@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Default-deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Auth & Admin helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isSystemAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'muhmmadhubaib498@gmail.com') ||
+        request.auth.uid == 'google_uid_owner_123' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // 3. Connection test endpoint
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // 4. User profile documents & all subcollections (projects, clips, settings)
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isSystemAdmin();
+
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId) || isSystemAdmin();
+      }
+    }
+
+    // 5. Payments collection
+    match /payments/{paymentId} {
+      allow read: if isSystemAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isSystemAdmin());
+      allow update, delete: if isSystemAdmin();
+    }
+
+    // 6. Free pass codes
+    match /freePassCodes/{codeId} {
+      allow read: if isSignedIn();
+      allow write: if isSystemAdmin();
+    }
+  }
+}
